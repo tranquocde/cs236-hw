@@ -1,6 +1,8 @@
 # CS236-HW2
 
-Programming assignment.
+## [Written part](https://share.goodnotes.com/s/xvrIiglf56nq8X640MlaN6)
+
+## Programming assignment.
 
 Feel free to explore all of the files. The only ones you will need to modify are
 
