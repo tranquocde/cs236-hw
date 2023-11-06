@@ -7,7 +7,7 @@ from codebase.models.vae import VAE
 from codebase.train import train
 from pprint import pprint
 from torchvision import datasets, transforms
-
+import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--z',         type=int, default=10,     help="Number of latent dimensions")
 parser.add_argument('--iter_max',  type=int, default=20000, help="Number of training iterations")
@@ -42,4 +42,17 @@ if args.train:
 
 else:
     ut.load_model_by_name(vae, global_step=args.iter_max)
-    ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)
+    x_samples = vae.sample_x(200)
+    np_x_samples = x_samples.detach().cpu().numpy().reshape(-1, 28, 28)
+
+    # Create a grid of 10x20
+    fig, axs = plt.subplots(10, 20, figsize=(10, 8))
+    fig.subplots_adjust(hspace = 0, wspace = 0)
+    for ax in axs.ravel():
+        ax.axis('off')
+    for i, ax in enumerate(axs.ravel()):
+        ax.imshow(np_x_samples[i], cmap='gray',aspect='auto')
+    plt.savefig("visualize_200_digit_vae.png")
+    plt.show()
+
+    # ut.evaluate_lower_bound(vae, labeled_subset, run_iwae=True)

@@ -7,7 +7,9 @@ from codebase import utils as ut
 from torch import nn, optim
 from torch.nn import functional as F
 from torchvision.utils import save_image
-
+from models.vae import VAE
+from models.gmvae import GMVAE
+from models.ssvae import SSVAE
 def train(model, train_loader, labeled_subset, device, tqdm, writer,
           iter_max=np.inf, iter_save=np.inf,
           model_name='model', y_status='none', reinitialize=False):

@@ -37,7 +37,8 @@ def sample_gaussian(m, v):
     # TODO: Modify/complete the code here
     # Sample z
     ################################################################################
-
+    eps = torch.randn_like(v)
+    z = m + torch.sqrt(v) * eps
     ################################################################################
     # End of code modification
     ################################################################################
@@ -64,7 +65,9 @@ def log_normal(x, m, v):
     # Compute element-wise log probability of normal and remember to sum over
     # the last dimension
     ################################################################################
-
+    element_wise_diff = x - m
+    log_prob = -0.5 * (torch.log(2 * np.pi * v) + (element_wise_diff ** 2) / v)
+    log_prob = torch.sum(log_prob, dim=-1)
     ################################################################################
     # End of code modification
     ################################################################################
@@ -88,7 +91,9 @@ def log_normal_mixture(z, m, v):
     # Compute the uniformly-weighted mixture of Gaussians density for each sample
     # in the batch
     ################################################################################
-
+    z = z.unsqueeze(1)# (batch,1,dim)
+    log_prob = log_normal(z,m,v) 
+    log_prob = log_mean_exp(log_prob,dim=1)
     ################################################################################
     # End of code modification
     ################################################################################

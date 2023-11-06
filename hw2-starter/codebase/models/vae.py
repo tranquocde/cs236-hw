@@ -41,7 +41,17 @@ class VAE(nn.Module):
         #
         # Outputs should all be scalar
         ################################################################################
+        m,v = self.enc.encode(x)
+        z = ut.sample_gaussian(m,v)
+        out = self.dec.decode(z)
 
+        kl = ut.kl_normal(m,v,self.z_prior_m,self.z_prior_v)
+        rec = -ut.log_bernoulli_with_logits(x,out)
+        nelbo = kl + rec
+
+        rec = torch.mean(rec)
+        kl = torch.mean(kl)
+        nelbo = torch.mean(nelbo)
         ################################################################################
         # End of code modification
         ################################################################################
@@ -97,8 +107,8 @@ class VAE(nn.Module):
 
     def sample_z(self, batch):
         return ut.sample_gaussian(
-            self.z_prior[0].expand(batch, self.z_dim),
-            self.z_prior[1].expand(batch, self.z_dim))
+            self.z_prior[0].expand(batch, self.z_dim),# (batch,z_dim)
+            self.z_prior[1].expand(batch, self.z_dim)) #(batch,z_dim)
 
     def sample_x(self, batch):
         z = self.sample_z(batch)
