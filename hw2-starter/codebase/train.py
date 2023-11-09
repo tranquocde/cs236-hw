@@ -1,15 +1,15 @@
 import argparse
 import numpy as np
 import os
-# import tensorflow as tf
 import torch
 from codebase import utils as ut
 from torch import nn, optim
 from torch.nn import functional as F
 from torchvision.utils import save_image
-from models.vae import VAE
-from models.gmvae import GMVAE
-from models.ssvae import SSVAE
+# from models.vae import VAE
+# from models.gmvae import GMVAE
+# from models.ssvae import SSVAE
+import matplotlib.pyplot as plt
 def train(model, train_loader, labeled_subset, device, tqdm, writer,
           iter_max=np.inf, iter_save=np.inf,
           model_name='model', y_status='none', reinitialize=False):
@@ -21,6 +21,9 @@ def train(model, train_loader, labeled_subset, device, tqdm, writer,
     with tqdm(total=iter_max) as pbar:
         while True:
             for batch_idx, (xu, yu) in enumerate(train_loader):
+                # img = xu[0][0]
+                # plt.imshow(img,cmap='gray')
+                # plt.show
                 i += 1 # i is num of gradient steps taken by end of loop iteration
                 optimizer.zero_grad()
 

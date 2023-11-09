@@ -7,7 +7,7 @@ from codebase.models.ssvae import SSVAE
 from codebase.train import train
 from pprint import pprint
 from torchvision import datasets, transforms
-
+import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--gw',        type=int, default=1,     help="Weight on the generative terms")
 parser.add_argument('--cw',        type=int, default=100,   help="Weight on the class term")
@@ -46,5 +46,20 @@ if args.train:
 
 else:
     ut.load_model_by_name(ssvae, args.iter_max)
+    # z = ssvae.sample_z(batch=200)#(200,64)
+    # y = torch.tensor([0,0,0,0,0,0,0,0,1,0])
+    # y = ut.duplicate(y,200).reshape(200,-1)
+    # x_samples = ssvae.sample_x_given(z,y)
+    # np_x_samples = x_samples.detach().cpu().numpy().reshape(-1, 28, 28)
+
+    # # Create a grid of 10x20
+    # fig, axs = plt.subplots(10, 20, figsize=(10, 8))
+    # fig.subplots_adjust(hspace = 0, wspace = 0)
+    # for ax in axs.ravel():
+    #     ax.axis('off')
+    # for i, ax in enumerate(axs.ravel()):
+    #     ax.imshow(np_x_samples[i], cmap='gray',aspect='auto')
+    # plt.savefig("visualize_200_digit_ssvae.png")
+    # plt.show()
 
 ut.evaluate_classifier(ssvae, test_set)

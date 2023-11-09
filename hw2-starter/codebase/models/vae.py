@@ -63,7 +63,7 @@ class VAE(nn.Module):
         Additionally, we also compute the ELBO KL and reconstruction terms
 
         Args:
-            x: tensor: (batch, dim): Observations
+            x: tensor: (batch, dim): Observations (100,784)
             iw: int: (): Number of importance weighted samples
 
         Returns:
@@ -78,6 +78,19 @@ class VAE(nn.Module):
         #
         # Outputs should all be scalar
         ################################################################################
+        m,v = self.enc.encode(x)
+        m = ut.duplicate(m,iw)
+        v = ut.duplicate(v,iw)
+        x = ut.duplicate(x,iw)
+        z = ut.sample_gaussian(m,v)
+        out = self.dec.decode(z)
+        kl = ut.log_normal(z,m,v) - ut.log_normal(z,self.z_prior[0],self.z_prior[1])
+        rec = -ut.log_bernoulli_with_logits(x,out)
+        nelbo = kl+rec
+        # elbo có dạng log(p(...))=> cần exp lên để thành p(...) rồi lấy mean(p(...)) và lấy log(mean(...))
+        # nhớ đổi dấu nelbo do cần tính elbo, niwae đổi dấu do cần tính min của số âm <=> max của số dương
+        niwae = -ut.log_mean_exp(-nelbo.reshape(iw,-1) , dim=0)
+        niwae , kl , rec = niwae.mean(),kl.mean(),rec.mean()
 
         ################################################################################
         # End of code modification

@@ -50,16 +50,29 @@ class SSVAE(nn.Module):
         #
         # Outputs should all be scalar
         ################################################################################
-        y_logits = self.cls.classify(x)
-        y_logprob = F.log_softmax(y_logits, dim=1)
-        y_prob = torch.softmax(y_logprob, dim=1) # (batch, y_dim)
+        y_logits = self.cls.classify(x) #100,10 ,, y_dim = 10
+        y_logprob = F.log_softmax(y_logits, dim=1) #100,10
+        y_prob = torch.softmax(y_logprob, dim=1) # (batch, y_dim)(100,10)
 
         # Duplicate y based on x's batch size. Then duplicate x
         # This enumerates all possible combination of x with labels (0, 1, ..., 9)
         y = np.repeat(np.arange(self.y_dim), x.size(0))
-        y = x.new(np.eye(self.y_dim)[y])
-        x = ut.duplicate(x, self.y_dim)
+        y = x.new(np.eye(self.y_dim)[y])#1000,10
+        x = ut.duplicate(x, self.y_dim)#1000,784
         ################################################################################
+        kl_y = ut.kl_cat(q=y_prob ,log_q=y_logprob,log_p= np.log(1/self.y_dim)) #(100,)
+
+        m , v = self.enc.encode(x,y) #(1000,64) , (1000,64)
+        z = ut.sample_gaussian(m,v) #(1000,64)
+        x_logits = self.dec.decode(z,y)#(1000,784)
+
+        kl_z = ut.kl_normal(m,v,self.z_prior_m,self.z_prior_v) #(1000,)
+        rec = -ut.log_bernoulli_with_logits(x,x_logits)#(1000,)
+
+        kl_z = (y_prob.t()*(kl_z.reshape(self.y_dim,-1))).sum(0) #(100)
+        rec = (y_prob.t()*(rec.reshape(self.y_dim,-1))).sum(0) #(100)
+        nelbo = kl_z + kl_y + rec #(100)
+        nelbo , kl_z, kl_y,rec = nelbo.mean(), kl_z.mean(),kl_y.mean(),rec.mean() #scalar
         # End of code modification
         ################################################################################
         return nelbo, kl_z, kl_y, rec

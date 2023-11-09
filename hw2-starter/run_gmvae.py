@@ -44,16 +44,16 @@ if args.train:
 
 else:
     ut.load_model_by_name(gmvae, global_step=args.iter_max)
-    # ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)
-    x_samples = gmvae.sample_x(200)
-    np_x_samples = x_samples.detach().cpu().numpy().reshape(-1, 28, 28)
+    ut.evaluate_lower_bound(gmvae, labeled_subset, run_iwae=True)
+    # x_samples = gmvae.sample_x(200)
+    # np_x_samples = x_samples.detach().cpu().numpy().reshape(-1, 28, 28)
 
-    # Create a grid of 10x20
-    fig, axs = plt.subplots(10, 20, figsize=(10, 8))
-    fig.subplots_adjust(hspace = 0, wspace = 0)
-    for ax in axs.ravel():
-        ax.axis('off')
-    for i, ax in enumerate(axs.ravel()):
-        ax.imshow(np_x_samples[i], cmap='gray',aspect='auto')
-    plt.savefig("visualize_200_digit_gmvae.png")
-    plt.show()
+    # # Create a grid of 10x20
+    # fig, axs = plt.subplots(10, 20, figsize=(10, 8))
+    # fig.subplots_adjust(hspace = 0, wspace = 0)
+    # for ax in axs.ravel():
+    #     ax.axis('off')
+    # for i, ax in enumerate(axs.ravel()):
+    #     ax.imshow(np_x_samples[i], cmap='gray',aspect='auto')
+    # plt.savefig("visualize_200_digit_gmvae.png")
+    # plt.show()
