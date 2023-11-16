@@ -35,7 +35,14 @@ class FSVAE(nn.Module):
         #
         # Outputs should all be scalar
         ################################################################################
-
+        #x:(100,3072), y:(100,10)
+        m,v = self.enc.encode(x,y)#(100,10)
+        z = ut.sample_gaussian(m,v)# (z|y,x) #(100,10)
+        x_mean = self.dec.decode(z,y) # only decode x_mean , the variance set default to 0.1 (100,3072)
+        kl_z = ut.kl_normal(m,v,self.z_prior_m,self.z_prior_v)# KL (100)
+        rec = -ut.log_normal(x,x_mean,0.1*torch.ones_like(x_mean)) # đã chọn z, cho nên chỉ cần tính log_normal (100)
+        nelbo = rec + kl_z
+        nelbo , kl_z,rec = nelbo.mean(),kl_z.mean(),rec.mean()
         ################################################################################
         # End of code modification
         ################################################################################
@@ -60,3 +67,4 @@ class FSVAE(nn.Module):
     def sample_z(self, batch):
         return ut.sample_gaussian(self.z_prior[0].expand(batch, self.z_dim),
                                   self.z_prior[1].expand(batch, self.z_dim))
+    

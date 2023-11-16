@@ -23,6 +23,7 @@ class SSVAE(nn.Module):
         self.cls = nn.Classifier(self.y_dim)
 
         # Set prior as fixed parameter attached to Module
+        # z : Normal(0,I)
         self.z_prior_m = torch.nn.Parameter(torch.zeros(1), requires_grad=False)
         self.z_prior_v = torch.nn.Parameter(torch.ones(1), requires_grad=False)
         self.z_prior = (self.z_prior_m, self.z_prior_v)
@@ -63,7 +64,7 @@ class SSVAE(nn.Module):
         kl_y = ut.kl_cat(q=y_prob ,log_q=y_logprob,log_p= np.log(1/self.y_dim)) #(100,)
 
         m , v = self.enc.encode(x,y) #(1000,64) , (1000,64)
-        z = ut.sample_gaussian(m,v) #(1000,64)
+        z = ut.sample_gaussian(m,v) #(1000,64) # p(z|y,x)
         x_logits = self.dec.decode(z,y)#(1000,784)
 
         kl_z = ut.kl_normal(m,v,self.z_prior_m,self.z_prior_v) #(1000,)
